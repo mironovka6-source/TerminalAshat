@@ -9,6 +9,7 @@ h1, h2 {
     color: #0056b3;
     text-align: center; /* Выравнивание по центру */
 }
+
 /* --- СТИЛИ ДЛЯ ЖИВЫХ ЧАСОВ --- */
 #live-clock {
     font-size: 1.5em; /* Размер шрифта */
@@ -29,21 +30,47 @@ h1, h2 {
 }
 /* --- КОНЕЦ СТИЛЕЙ ДЛЯ ЖИВЫХ ЧАСОВ --- */
 
+---
+### Скрытие раздела "Движение материалов (Остатки)"
+
+/*
+   Скрываем контейнер, в котором будет (или уже есть) таблица материалов.
+   Это уберет с экрана все, что находится внутри этого div:
+   сообщение о загрузке и саму таблицу материалов, когда она будет сгенерирована.
+*/
+#balances-table-container {
+    display: none;
+}
+
+/* Опционально: если вы хотите скрыть и заголовок "Движение материалов (Остатки)",
+   а также сообщение о загрузке.
+   Для этого, в вашем `index.html`, дайте ID заголовку H2, например:
+   <h2 id="materials-header">Движение материалов (Остатки)</h2>
+   Тогда вы сможете скрыть его так:
+*/
+/*
+#materials-header {
+    display: none;
+}
+*/
+/* Скрываем также сообщение о загрузке для этого раздела: */
+#balances-loading {
+    display: none;
+}
+---
+
 .container {
     background-color: #fff;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     margin-bottom: 20px;
-    /* Позволяет содержимому контейнера прокручиваться по горизонтали,
-       если оно становится слишком широким для экрана.
-       Это основной механизм для узких экранов. */
-    overflow-x: auto;
+    overflow-x: auto; /* Позволяет содержимому контейнера прокручиваться по горизонтали */
 }
 
 /* Общие стили для всех таблиц */
 table {
-    width: 100%; /* По умолчанию таблицы занимают 100% ширины родительского контейнера */
+    width: 100%;
     border-collapse: collapse;
     margin-top: 3px;
 }
@@ -52,30 +79,33 @@ table th, table td {
     border: 1px solid #383737;
     padding: 8px;
     text-align: left;
-    white-space: normal; /* Разрешаем перенос текста по умолчанию */
-    word-wrap: break-word; /* Позволяет очень длинным словам переноситься */
+    white-space: normal;
+    word-wrap: break-word;
 }
 
 table th {
     background-color: #007bff;
     color: white;
     font-weight: bold;
-    
 }
 
 /* Убираем чередующееся подкрашивание строк для таблицы должников, оставляем для других */
+/* Это правило применяется ко всем таблицам, КРОМЕ тех, у которых есть класс 'debtors-table' */
 table:not(.debtors-table) tr:nth-child(even) {
     background-color: #f2f2f2;
 }
+
 /* Специально для заголовков таблицы "Долги по сотрудникам" */
 .debtors-table th {
-    text-align: center; /* Центрируем текст по горизонтали */
+    text-align: center;
 }
 /* --- НОВОЕ ПРАВИЛО: Специально для заголовков таблицы "Движение материалов" --- */
+/* Это правило будет применено, но не будет видно, так как контейнер скрыт */
 #balances-table-container th {
-    text-align: center; /* Центрируем текст по горизонтали */
+    text-align: center;
 }
 /* --- КОНЕЦ НОВОГО ПРАВИЛА --- */
+
 table tr:hover {
     background-color: #ddd;
 }
@@ -99,15 +129,15 @@ table tr:hover {
 /* --- СПЕЦИАЛЬНЫЕ СТИЛИ ДЛЯ ТАБЛИЦЫ "ДОЛГИ ПО СОТРУДНИКАМ" (с классом debtors-table) --- */
 /* Эти стили применяются на больших экранах (компьютерах), где table-layout: auto будет работать */
 .debtors-table {
-    table-layout: auto; /* Подстраивает ширину колонок по содержимому */
-    width: auto; /* Позволяет таблице сжиматься/расширяться по содержимому */
-    max-width: 100%; /* Но не шире родительского контейнера */
+    table-layout: auto;
+    width: auto;
+    max-width: 100%;
 }
 
 /* Стили для ячеек таблицы должников на больших экранах, чтобы текст в них не переносился */
 .debtors-table th,
 .debtors-table td {
-    white-space: nowrap; /* Запрещаем перенос текста */
+    white-space: nowrap;
 }
 
 /* Опционально: минимальная ширина для колонок таблицы должников на больших экранах */
@@ -122,6 +152,7 @@ table tr:hover {
 }
 
 /* --- СТИЛИ ДЛЯ ВИЗУАЛЬНОГО РАЗДЕЛЕНИЯ ГРУПП ДОЛЖНИКОВ (ЧЕРЕДОВАНИЕ ФОНА) --- */
+/* Эти стили зависят от того, как ваш JavaScript будет добавлять классы 'debtor-group-odd' и 'debtor-group-even' */
 
 /* Заливка для нечетных групп должников */
 .debtors-table tr.debtor-group-odd td {
@@ -130,35 +161,44 @@ table tr:hover {
 
 /* Заливка для четных групп должников */
 .debtors-table tr.debtor-group-even td {
-    background-color: #9dcbe3; /* Очень светло-голубой фон */
+    background-color: #e6f7ff; /* Очень светло-голубой фон (изменил с #9dcbe3 на более светлый для контраста с hover) */
 }
 
 /* Добавляем четкие границы между группами должников */
-.debtors-table tr.debtor-group-even:last-of-type td, /* Последняя строка четной группы */
-.debtors-table tr.debtor-group-odd:last-of-type td { /* Последняя строка нечетной группы */
-    border-bottom: 2px solid #b3d9ff; /* Более толстая граница снизу группы */
+.debtors-table tr.debtor-group-even:last-of-type td,
+.debtors-table tr.debtor-group-odd:last-of-type td {
+    border-bottom: 2px solid #a9d1ff; /* Более толстая и немного ярче граница снизу группы */
 }
-/* Или более универсально для границы перед началом новой группы (если класс debtor-group-start есть на первой строке) */
+
+/* Дополнительное правило для верхней границы каждой новой группы, если нужно */
+/*
+.debtors-table tr.debtor-group-odd:first-of-type td,
+.debtors-table tr.debtor-group-even:first-of-type td {
+    border-top: 2px solid #a9d1ff;
+}
+*/
+/* Более универсально для границы перед началом новой группы (если класс debtor-group-start есть на первой строке) */
+/* Важно: :has() - это относительно новая функция CSS, которая может не поддерживаться старыми браузерами. */
 .debtors-table tr:has(+ .debtor-group-odd) td,
 .debtors-table tr:has(+ .debtor-group-even) td {
-    border-top: 1px solid #ddd; /* Стандартная тонкая граница между группами, если нет явной нижней */
+    border-top: 1px solid #ddd; /* Стандартная тонкая граница между группами */
 }
 
 
 /* --- СТИЛИ ДЛЯ ВЫРАВНИВАНИЯ ОБЪЕДИНЕННЫХ ЯЧЕЕК --- */
 
 .debtors-table td[rowspan] {
-    vertical-align: middle; /* Выравнивание по центру по вертикали */
-    text-align: left;       /* Выравнивание по левому краю по горизонтали */
-    padding-left: 3px;     /* Небольшой отступ слева */
+    vertical-align: middle;
+    text-align: left;
+    padding-left: 3px;
 }
 
 /* Если вы используете чередование фона, убедитесь, что это правило применяется: */
 .debtors-table tr.debtor-group-odd td[rowspan],
 .debtors-table tr.debtor-group-even td[rowspan] {
-    vertical-align: middle; /* Выравнивание по центру по вертикали */
-    text-align: left;       /* Выравнивание по левому краю по горизонтали */
-    padding-left: 3px;     /* Небольшой отступ слева */
+    vertical-align: middle;
+    text-align: left;
+    padding-left: 3px;
 }
 
 /* --- КОНЕЦ СТИЛЕЙ ДЛЯ ВЫРАВНИВАНИЯ --- */
@@ -189,35 +229,35 @@ table tr:hover {
 @media (max-width: 768px) {
     /* --- Оптимизация отступов и шрифтов для мобильных --- */
     body {
-        margin: 0px; /* Минимальный отступ */
+        margin: 0px;
     }
 
     .container {
-        padding: 5px; /* Уменьшаем внутренние отступы контейнера */
+        padding: 5px;
     }
 
     /* Общие отступы и шрифт ячеек таблиц на мобильных */
     table th,
     table td {
-        padding: 3px; /* Уменьшаем до 3px */
-        font-size: 0.8em; /* Уменьшаем до 0.8em */
-        white-space: normal; /* Разрешаем перенос текста для всех таблиц */
+        padding: 3px;
+        font-size: 0.8em;
+        white-space: normal;
     }
 
     /* Специальные оптимизации для таблицы должников на мобильных (книжная ориентация) */
     .debtors-table th,
     .debtors-table td {
-        padding: 2px; /* Уменьшаем до 2px */
-        font-size: 0.7em; /* Уменьшаем до 0.7em */
-        white-space: normal; /* Разрешаем перенос текста в таблице должников на мобильных */
+        padding: 2px;
+        font-size: 0.7em;
+        white-space: normal;
     }
 
-    /* Сбрасываем min-width для колонок debtors-table на мобильных, чтобы они могли сжиматься сильнее */
+    /* Сбрасываем min-width для колонок debtors-table на мобильных */
     .debtors-table th:nth-child(2),
     .debtors-table td:nth-child(2),
     .debtors-table th:nth-child(3),
     .debtors-table td:nth-child(3) {
-        min-width: unset; /* Позволяем колонкам сжиматься */
+        min-width: unset;
     }
 
     /* Заголовки на мобильных */
@@ -232,36 +272,33 @@ table tr:hover {
 
 /* --- Стили для АЛЬБОМНОЙ ОРИЕНТАЦИИ на МОБИЛЬНЫХ УСТРОЙСТВАХ --- */
 @media (max-width: 768px) and (orientation: landscape) {
-    /* Эти стили применяются, когда ширина до 768px И ориентация - альбомная */
-
     .container {
-        padding: 5px; /* Или даже 0px, если нужно совсем впритык */
+        padding: 5px;
     }
 
     .debtors-table {
-        /* В альбомной ориентации, даем таблице должников максимально растянуться */
         width: 100%;
-        table-layout: auto; /* Позволяем ширине колонок подстраиваться */
+        table-layout: auto;
     }
 
     .debtors-table th,
     .debtors-table td {
-        white-space: nowrap; /* В альбомной ориентации текст может не переноситься, чтобы сэкономить высоту */
-        font-size: 0.8em; /* Немного увеличим шрифт, так как места больше */
-        padding: 5px; /* Увеличим отступы, так как места больше */
+        white-space: nowrap;
+        font-size: 0.8em;
+        padding: 5px;
     }
 
-    /* Восстанавливаем min-width для колонок в альбомной ориентации, так как места больше */
+    /* Восстанавливаем min-width для колонок в альбомной ориентации */
     .debtors-table th:nth-child(2),
     .debtors-table td:nth-child(2) {
-        min-width: 100px; /* Пример */
+        min-width: 100px;
     }
     .debtors-table th:nth-child(3),
     .debtors-table td:nth-child(3) {
-        min-width: 130px; /* Пример */
+        min-width: 130px;
     }
 
-    /* Заголовки в альбомной ориентации, если нужно их поменять */
+    /* Заголовки в альбомной ориентации */
     h1 {
         font-size: 1.7em;
     }
