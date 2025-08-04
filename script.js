@@ -11,6 +11,14 @@ let balancesData = [];
 let debtorsSummaryData = []; // Будет хранить детализированные данные по должникам
 let availableDebtors = []; // Список уникальных должников для фильтра
 
+// Объявляем заголовки таблицы должников в глобальной области видимости
+const debtorsTableHeaders = [
+    { key: '№ п/п', label: '№' },
+    { key: 'Фамилия должника', label: 'Фамилия должника' },
+    { key: 'Материал', label: 'Материал' },
+    { key: 'Количество', label: 'Кол-во' }
+];
+
 // --- Функция: Парсинг JSON-ответа от Google Sheets ---
 function parseGoogleSheetJSON(jsonText) {
     try {
@@ -392,12 +400,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
         debtorsSummaryData = currentDebtorsData;
-        const debtorsTableHeaders = [
-            { key: '№ п/п', label: '№' },
-            { key: 'Фамилия должника', label: 'Фамилия должника' },
-            { key: 'Материал', label: 'Материал' },
-            { key: 'Количество', label: 'Кол-во' }
-        ];
 
         renderDebtorFilter(availableDebtors);
         renderTable(debtorsSummaryData, 'debtors-table-container', debtorsTableHeaders, null, 'debtors-table', 'all');
