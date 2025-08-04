@@ -10,6 +10,7 @@ h1, h2 {
     text-align: center;
 }
 
+/* --- СТИЛИ ДЛЯ ЖИВЫХ ЧАСОВ --- */
 #live-clock {
     font-size: 1.5em;
     font-weight: bold;
@@ -19,6 +20,7 @@ h1, h2 {
     margin-bottom: 20px;
 }
 
+/* Адаптивность для мобильных */
 @media (max-width: 768px) {
     #live-clock {
         font-size: 1.2em;
@@ -26,7 +28,9 @@ h1, h2 {
         margin-bottom: 10px;
     }
 }
+/* --- КОНЕЦ СТИЛЕЙ ДЛЯ ЖИВЫХ ЧАСОВ --- */
 
+/* Скрытие раздела "Движение материалов (Остатки)" */
 #balances-table-container {
     display: none;
 }
@@ -105,6 +109,27 @@ table tr:hover {
     table-layout: fixed;
     width: 100%;
     max-width: 100%;
+}
+
+/* Явно задаем ширину для каждой колонки */
+.debtors-table th:nth-child(1),
+.debtors-table td:nth-child(1) {
+    width: 5%; /* № п/п */
+}
+
+.debtors-table th:nth-child(2),
+.debtors-table td:nth-child(2) {
+    width: 25%; /* Фамилия должника */
+}
+
+.debtors-table th:nth-child(3),
+.debtors-table td:nth-child(3) {
+    width: 40%; /* Материал */
+}
+
+.debtors-table th:nth-child(4),
+.debtors-table td:nth-child(4) {
+    width: 30%; /* Количество */
 }
 
 /* Скрываем ячейки с классом hidden-cell, чтобы они не ломали верстку */
