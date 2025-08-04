@@ -11,7 +11,32 @@
     <title>Учет материалов и долгов</title>
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
-    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>    
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <style>
+        /* CSS для нового фильтра */
+        .filter-container {
+            position: relative;
+            margin-bottom: 10px;
+        }
+        .filter-options {
+            display: none;
+            position: absolute;
+            background-color: white;
+            border: 1px solid #ccc;
+            z-index: 10;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .filter-options label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .filter-options-show {
+            display: block;
+        }
+    </style>
 </head>
 <body>
     <h1>Учет Материалов и Долгов</h1>
@@ -19,24 +44,24 @@
     <hr>
 
     <p id="balances-loading" class="loading">Загрузка данных об остатках...</p>
-    <div id="balances-table-container" class="container"hidden>
-        </div>
+    <div id="balances-table-container" class="container" hidden>
+    </div>
 
     <hr>
 
     <h2>Долги по сотрудникам</h2>
     <div class="debtors-controls">
-        <select id="debtorFilterSelect" multiple size="5">
-            <option value="all">-- Выбрать всех --</option>
-        </select>
-        <button id="downloadDebtorsImage">Сделать скриншот</button>
+        <div class="filter-container">
+            <button id="showDebtorFilterButton">Выбрать должников</button>
+            <div id="debtorFilterOptions" class="filter-options">
+                </div>
+        </div>
     </div>
     
     <p id="debtors-loading" class="loading">Загрузка данных о долгах...</p>
     <div id="debtors-table-container" class="container">
-        </div>
+    </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="script.js"></script>    
+    <script src="script.js"></script>
 </body>
 </html>
