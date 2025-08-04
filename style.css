@@ -10,7 +10,6 @@ h1, h2 {
     text-align: center;
 }
 
-/* --- СТИЛИ ДЛЯ ЖИВЫХ ЧАСОВ --- */
 #live-clock {
     font-size: 1.5em;
     font-weight: bold;
@@ -20,7 +19,6 @@ h1, h2 {
     margin-bottom: 20px;
 }
 
-/* Адаптивность для мобильных */
 @media (max-width: 768px) {
     #live-clock {
         font-size: 1.2em;
@@ -28,9 +26,7 @@ h1, h2 {
         margin-bottom: 10px;
     }
 }
-/* --- КОНЕЦ СТИЛЕЙ ДЛЯ ЖИВЫХ ЧАСОВ --- */
 
-/* Скрытие раздела "Движение материалов (Остатки)" */
 #balances-table-container {
     display: none;
 }
@@ -48,12 +44,11 @@ h1, h2 {
     overflow-x: auto;
 }
 
-/* Общие стили для всех таблиц */
 table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 3px;
-    table-layout: fixed; /* Принудительно фиксированный макет для стабильности */
+    table-layout: fixed;
 }
 
 table th, table td {
@@ -111,7 +106,6 @@ table tr:hover {
     max-width: 100%;
 }
 
-/* Явно задаем ширину для каждой колонки */
 .debtors-table th:nth-child(1),
 .debtors-table td:nth-child(1) {
     width: 5%; /* № п/п */
@@ -132,16 +126,10 @@ table tr:hover {
     width: 30%; /* Количество */
 }
 
-/* Скрываем ячейки с классом hidden-cell, чтобы они не ломали верстку */
-.hidden-cell {
-    display: none;
-}
-
-/* Стили для ячеек, объединенных по вертикали */
-.merged-cell {
-    vertical-align: middle !important;
-    text-align: left !important;
-    padding-left: 3px !important;
+.debtors-table td[rowspan] {
+    vertical-align: middle;
+    text-align: left;
+    padding-left: 3px;
 }
 
 .debtors-table tr.debtor-group-odd td {
@@ -162,18 +150,6 @@ table tr:hover {
     border-top: 1px solid #ddd;
 }
 
-.debtors-table td[rowspan] {
-    vertical-align: middle;
-    text-align: left;
-    padding-left: 3px;
-}
-
-.debtors-table tr.debtor-group-odd td[rowspan],
-.debtors-table tr.debtor-group-even td[rowspan] {
-    vertical-align: middle;
-    text-align: left;
-    padding-left: 3px;
-}
 
 /* Стили для нового фильтра */
 .debtors-controls {
