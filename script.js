@@ -143,9 +143,7 @@ function renderTable(data, containerId, headersMap, uniqueByKey = null, tableCla
 
     let processedData = [...data];
 
-    if (filterByDebtors.length > 0) {
-        processedData = processedData.filter(row => filterByDebtors.includes(row['Фамилия должника']));
-    }
+    // Убрали фильтрацию из этой функции, теперь она выполняется в updateDebtorsTable
 
     if (uniqueByKey && processedData.length > 0) {
         const seenKeys = new Set();
@@ -299,12 +297,29 @@ function updateDebtorsTable(event) {
         selectAllCheckbox.checked = isAllDebtorsSelected;
     }
     
-    // Если ничего не выбрано, то ничего не отображаем
+    // --- НОВАЯ, ИСПРАВЛЕННАЯ ЛОГИКА ФИЛЬТРАЦИИ ---
     if (selectedDebtors.length === 0) {
         renderTable([], 'debtors-table-container', []);
-    } else {
-        renderTable(debtorsSummaryData, 'debtors-table-container', debtorsTableHeaders, null, 'debtors-table', 'all', selectedDebtors);
+        return;
     }
+    
+    let filteredDebtorsData = [];
+    let currentDebtorIsSelected = false;
+
+    debtorsSummaryData.forEach(row => {
+        // Проверяем, является ли эта строка первой для нового должника (поле Фамилия заполнено)
+        if (row['Фамилия должника']) {
+            // Обновляем флаг, если этот должник выбран
+            currentDebtorIsSelected = selectedDebtors.includes(row['Фамилия должника']);
+        }
+        
+        // Если текущая группа должника выбрана, добавляем строку (включая строки с пустым полем Фамилия)
+        if (currentDebtorIsSelected) {
+            filteredDebtorsData.push(row);
+        }
+    });
+    
+    renderTable(filteredDebtorsData, 'debtors-table-container', debtorsTableHeaders, null, 'debtors-table');
 }
 
 
