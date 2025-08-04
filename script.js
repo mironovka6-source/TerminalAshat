@@ -185,33 +185,26 @@ function renderTable(data, containerId, headersMap, uniqueByKey = null, tableCla
         if (rowData.cssClass) {
             row.classList.add(rowData.cssClass);
         }
-        
-        let headerIndex = 0;
-        
-        // Создаем ячейки для № п/п и Фамилии только если это первая строка группы
-        if (tableClass === 'debtors-table' && rowData.rowspan > 0) {
-            const cell1 = row.insertCell(headerIndex++);
-            cell1.textContent = rowData['№ п/п'];
-            cell1.rowSpan = rowData.rowspan;
-            
-            const cell2 = row.insertCell(headerIndex++);
-            cell2.textContent = rowData['Фамилия должника'];
-            cell2.rowSpan = rowData.rowspan;
-        } else if (tableClass !== 'debtors-table') {
-            // Для обычных таблиц создаем все ячейки
-            const cell1 = row.insertCell(headerIndex++);
-            cell1.textContent = rowData['№ п/п'];
-            
-            const cell2 = row.insertCell(headerIndex++);
-            cell2.textContent = rowData['Фамилия должника'];
-        }
 
-        // Всегда создаем ячейки для Материала и Количества
-        const cell3 = row.insertCell(headerIndex++);
-        cell3.textContent = rowData['Материал'];
-        
-        const cell4 = row.insertCell(headerIndex++);
-        cell4.textContent = rowData['Количество'];
+        displayHeaders.forEach(h => {
+            // Если это таблица должников и это колонки "№ п/п" или "Фамилия",
+            // и rowspan равен 0, то эту ячейку создавать не нужно, так как
+            // она уже объединена ячейкой сверху.
+            if (tableClass === 'debtors-table' && (h.key === '№ п/п' || h.key === 'Фамилия должника')) {
+                if (rowData.rowspan === 0) {
+                    return;
+                }
+            }
+            
+            const cell = row.insertCell();
+
+            // Если это первая строка группы с rowspan > 1, добавляем атрибут rowspan
+            if (tableClass === 'debtors-table' && (h.key === '№ п/п' || h.key === 'Фамилия должника') && rowData.rowspan > 1) {
+                cell.rowSpan = rowData.rowspan;
+            }
+            
+            cell.textContent = (rowData[h.key] !== null && rowData[h.key] !== undefined && rowData[h.key] !== '') ? rowData[h.key] : '';
+        });
     });
 
     container.innerHTML = '';
