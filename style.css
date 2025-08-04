@@ -245,7 +245,7 @@ table tr:hover {
 
     .debtors-table {
         width: 100%;
-        table-layout: fixed; /* Исправлено на fixed */
+        table-layout: fixed;
     }
 
     .debtors-table th,
