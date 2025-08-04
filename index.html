@@ -12,30 +12,31 @@
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 </head>
 <body>
-    <h1>Учет Долгов</h1>
+    <h1>Учет Материалов и Долгов</h1>
     <div id="live-clock"></div> <hr>
     <hr>
 
     <p id="balances-loading" class="loading">Загрузка данных об остатках...</p>
     <div id="balances-table-container" class="container" hidden>
-    </div>
+        </div>
 
     <hr>
 
     <h2>Долги по сотрудникам</h2>
+    <p id="debtors-loading" class="loading">Загрузка данных по долгам...</p>
+    
     <div class="debtors-controls">
         <div class="filter-container">
             <button id="showDebtorFilterButton">Выбрать должников</button>
-            <div id="debtorFilterOptions" class="filter-options">
-                </div>
+            <div id="debtorFilterOptions" class="filter-options"></div>
         </div>
+        <button id="takeScreenshotButton">Сделать скриншот</button>
     </div>
-    
-    <p id="debtors-loading" class="loading">Загрузка данных о долгах...</p>
-    <div id="debtors-table-container" class="container">
-    </div>
+
+    <div id="debtors-table-container" class="container"></div>
 
     <script src="script.js"></script>
 </body>
