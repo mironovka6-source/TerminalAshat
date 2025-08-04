@@ -185,27 +185,35 @@ function renderTable(data, containerId, headersMap, uniqueByKey = null, tableCla
         if (rowData.cssClass) {
             row.classList.add(rowData.cssClass);
         }
-
-        displayHeaders.forEach(h => {
-            // Если это таблица должников и это колонки "№ п/п" или "Фамилия должника",
-            // и при этом rowspan === 0, мы пропускаем создание ячейки, так как
-            // она уже объединена ячейкой сверху.
-            if (tableClass === 'debtors-table' && (h.key === '№ п/п' || h.key === 'Фамилия должника')) {
-                if (rowData.rowspan === 0) {
-                    return; // Пропускаем эту итерацию
-                }
-            }
+        
+        // Создаем ячейки для № п/п и Фамилии только если это не объединенная строка
+        if (tableClass === 'debtors-table' && rowData.rowspan > 0) {
+            const cell1 = row.insertCell(0);
+            cell1.textContent = rowData['№ п/п'];
+            cell1.rowSpan = rowData.rowspan;
             
-            const cell = row.insertCell();
-
-            // Если это первая строка группы и rowspan > 1, добавляем атрибут rowspan
-            if (tableClass === 'debtors-table' && (h.key === '№ п/п' || h.key === 'Фамилия должника') && rowData.rowspan > 1) {
-                cell.rowSpan = rowData.rowspan;
-            }
+            const cell2 = row.insertCell(1);
+            cell2.textContent = rowData['Фамилия должника'];
+            cell2.rowSpan = rowData.rowspan;
             
-            // Заполняем ячейку данными
-            cell.textContent = (rowData[h.key] !== null && rowData[h.key] !== undefined && rowData[h.key] !== '') ? rowData[h.key] : '';
-        });
+            // Затем создаем остальные ячейки
+            const cell3 = row.insertCell(2);
+            cell3.textContent = rowData['Материал'];
+            const cell4 = row.insertCell(3);
+            cell4.textContent = rowData['Количество'];
+        } else if (tableClass === 'debtors-table' && rowData.rowspan === 0) {
+             // Для объединенных строк, создаем только ячейки для Материала и Количества
+             const cell1 = row.insertCell(0);
+             cell1.textContent = rowData['Материал'];
+             const cell2 = row.insertCell(1);
+             cell2.textContent = rowData['Количество'];
+        } else {
+            // Для других таблиц (не должников), создаем все ячейки
+            displayHeaders.forEach(h => {
+                const cell = row.insertCell();
+                cell.textContent = (rowData[h.key] !== null && rowData[h.key] !== undefined && rowData[h.key] !== '') ? rowData[h.key] : '';
+            });
+        }
     });
 
     container.innerHTML = '';
@@ -285,11 +293,14 @@ function updateDebtorsTable(event) {
 
         if (selectAllCheckbox) {
             selectAllCheckbox.checked = allChecked;
-            if (allChecked) {
-                selectedDebtors.length = 0;
-                selectedDebtors.push(...availableDebtors);
-            }
         }
+    }
+    
+    // Если "Все" выбрано, добавляем всех должников в массив для рендера
+    const isSelectAllChecked = selectAllCheckbox && selectAllCheckbox.checked;
+    if (isSelectAllChecked) {
+        selectedDebtors.length = 0; // Очищаем, чтобы не было дублирования
+        selectedDebtors.push(...availableDebtors);
     }
     
     // Если ничего не выбрано, то ничего не отображаем
@@ -314,7 +325,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         { key: 'Приход', label: 'Приход' },
         { key: 'Расход', label: 'Расход' },
         { key: 'Списание', label: 'Списание' },
-        { key: 'Возврат', 'label': 'Возврат' },
+        { key: 'Возврат', label: 'Возврат' },
         { key: 'Сейчас на складе', label: 'Сейчас на складе' }
     ];
     const loadedBalances = await loadGoogleSheetData(BALANCES_URL);
