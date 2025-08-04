@@ -113,17 +113,17 @@ table tr:hover {
 
 .debtors-table th:nth-child(2),
 .debtors-table td:nth-child(2) {
-    width: 30%; /* Фамилия должника (увеличено) */
+    width: 30%; /* Фамилия должника */
 }
 
 .debtors-table th:nth-child(3),
 .debtors-table td:nth-child(3) {
-    width: 55%; /* Материал (увеличено) */
+    width: 55%; /* Материал */
 }
 
 .debtors-table th:nth-child(4),
 .debtors-table td:nth-child(4) {
-    width: 10%; /* Количество (уменьшено) */
+    width: 10%; /* Количество */
 }
 
 .debtors-table td[rowspan] {
@@ -160,7 +160,7 @@ table tr:hover {
 
 .filter-container {
     position: relative;
-    text-align: left; /* ИЗМЕНЕНО: Выравнивание текста по левому краю */
+    text-align: left;
 }
 
 #showDebtorFilterButton {
@@ -177,11 +177,11 @@ table tr:hover {
     display: none;
     position: absolute;
     top: 100%;
-    left: 0; /* ИЗМЕНЕНО: Привязка к левому краю */
+    left: 0;
     background-color: white;
     border: 1px solid #ccc;
     z-index: 10;
-    max-height: 450px;
+    /* УДАЛЕНО: max-height: 200px; */
     overflow-y: auto;
     padding: 10px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
@@ -233,6 +233,11 @@ table tr:hover {
 
     h2 {
         font-size: 1.2em;
+    }
+    
+    /* ИЗМЕНЕНО: Удалено ограничение по высоте для мобильных устройств */
+    .filter-options {
+        /* УДАЛЕНО: max-height: 300px; */
     }
 }
 
