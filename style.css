@@ -118,12 +118,12 @@ table tr:hover {
 
 .debtors-table th:nth-child(3),
 .debtors-table td:nth-child(3) {
-    width: 45%; /* ИЗМЕНЕНО: Материал (увеличено) */
+    width: 55%; /* ИЗМЕНЕНО: Материал (увеличено) */
 }
 
 .debtors-table th:nth-child(4),
 .debtors-table td:nth-child(4) {
-    width: 20%; /* ИЗМЕНЕНО: Количество (уменьшено) */
+    width: 10%; /* ИЗМЕНЕНО: Количество (уменьшено) */
 }
 
 .debtors-table td[rowspan] {
