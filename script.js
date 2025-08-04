@@ -131,8 +131,8 @@ function renderTable(data, containerId, headersMap, uniqueByKey = null, tableCla
         return;
     }
 
-    const loadingMessage = container.previousElementSibling;
-    if (loadingMessage && loadingMessage.classList.contains('loading')) {
+    const loadingMessage = document.getElementById(containerId.replace('-table-container', '-loading'));
+    if (loadingMessage) {
         loadingMessage.style.display = 'none';
     }
 
@@ -319,7 +319,7 @@ function updateDebtorsTable(event) {
     renderTable(filteredDebtorsData, 'debtors-table-container', debtorsTableHeaders, null, 'debtors-table');
 }
 
-// --- НОВАЯ ФУНКЦИЯ: СДЕЛАТЬ СКРИНШОТ ТАБЛИЦЫ ---
+// --- ФУНКЦИЯ: СДЕЛАТЬ СКРИНШОТ ТАБЛИЦЫ ---
 async function takeDebtorsTableScreenshot() {
     const tableContainer = document.getElementById('debtors-table-container');
 
@@ -327,31 +327,26 @@ async function takeDebtorsTableScreenshot() {
         alert('Контейнер с таблицей не найден!');
         return;
     }
-
-    // Включаем полосу прокрутки, если она нужна, чтобы html2canvas мог захватить всю таблицу.
+    
     const originalOverflow = tableContainer.style.overflow;
     tableContainer.style.overflow = 'visible';
 
-    // Создаем скриншот с помощью библиотеки html2canvas
     try {
         const canvas = await html2canvas(tableContainer, {
-            logging: false, // Отключаем логи в консоль
-            useCORS: true, // Разрешаем использование внешних ресурсов, если они есть
+            logging: false,
+            useCORS: true,
         });
 
-        // Создаем ссылку для скачивания изображения
         const a = document.createElement('a');
         a.href = canvas.toDataURL('image/png');
         a.download = 'Долги_по_сотрудникам.png';
         
-        // "Нажимаем" на ссылку, чтобы запустить скачивание
         a.click();
         
     } catch (error) {
         console.error('Ошибка при создании скриншота:', error);
         alert('Не удалось сделать скриншот.');
     } finally {
-        // Возвращаем исходное значение overflow, чтобы не менять поведение страницы
         tableContainer.style.overflow = originalOverflow;
     }
 }
@@ -462,13 +457,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         const debtorsLoading = document.getElementById('debtors-loading');
         if (debtorsLoading) debtorsLoading.style.display = 'none';
     }
+    
+    // ИСПРАВЛЕНИЕ: Скрываем сообщение о загрузке после успешного получения данных
+    const debtorsLoading = document.getElementById('debtors-loading');
+    if (debtorsLoading) {
+        debtorsLoading.style.display = 'none';
+    }
+
 
     const showDebtorFilterButton = document.getElementById('showDebtorFilterButton');
     if (showDebtorFilterButton) {
         showDebtorFilterButton.addEventListener('click', toggleDebtorFilter);
     }
     
-    // ДОБАВЛЕННЫЙ КОД: Обработчик для новой кнопки скриншота
     const takeScreenshotButton = document.getElementById('takeScreenshotButton');
     if (takeScreenshotButton) {
         takeScreenshotButton.addEventListener('click', takeDebtorsTableScreenshot);
