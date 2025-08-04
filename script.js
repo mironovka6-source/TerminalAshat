@@ -250,7 +250,7 @@ function updateClock() {
     }
 }
 
-// --- Функции для фильтра должников (ИСПРАВЛЕНЫ) ---
+// --- ИСПРАВЛЕННЫЕ ФУНКЦИИ ДЛЯ ФИЛЬТРА ДОЛЖНИКОВ ---
 function toggleDebtorFilter() {
     const filterOptions = document.getElementById('debtorFilterOptions');
     filterOptions.classList.toggle('filter-options-show');
@@ -294,7 +294,8 @@ function updateDebtorsTable(event) {
     });
 
     if (selectAllCheckbox) {
-        const isAllDebtorsSelected = selectedDebtors.length === availableDebtors.length;
+        const allDebtorsCheckboxes = Array.from(checkboxes).filter(cb => cb.value !== 'Все');
+        const isAllDebtorsSelected = allDebtorsCheckboxes.every(cb => cb.checked);
         selectAllCheckbox.checked = isAllDebtorsSelected;
     }
     
