@@ -123,7 +123,7 @@ async function loadGoogleSheetData(url) {
     }
 }
 
-// --- НОВАЯ ФУНКЦИЯ ДЛЯ ОТОБРАЖЕНИЯ ДАННЫХ В ТАБЛИЦЕ (ИСПРАВЛЕНА ДЛЯ ROWSPAN) ---
+// --- ИСПРАВЛЕННАЯ ФУНКЦИЯ ДЛЯ ОТОБРАЖЕНИЯ ДАННЫХ В ТАБЛИЦЕ ---
 function renderTable(data, containerId, headersMap, uniqueByKey = null, tableClass = null, limit = 'all', filterByDebtors = []) {
     const container = document.getElementById(containerId);
     if (!container) {
@@ -187,22 +187,20 @@ function renderTable(data, containerId, headersMap, uniqueByKey = null, tableCla
         }
 
         displayHeaders.forEach(h => {
-            // Если это таблица должников и это колонки "№ п/п" или "Фамилия",
-            // и rowspan равен 0, то эту ячейку создавать не нужно, так как
-            // она уже объединена ячейкой сверху.
-            if (tableClass === 'debtors-table' && (h.key === '№ п/п' || h.key === 'Фамилия должника')) {
-                if (rowData.rowspan === 0) {
-                    return;
-                }
+            // Если это таблица должников и это одна из колонок с rowspan,
+            // и при этом rowspan === 0, мы пропускаем создание ячейки.
+            if (tableClass === 'debtors-table' && (h.key === '№ п/п' || h.key === 'Фамилия должника') && rowData.rowspan === 0) {
+                return;
             }
             
             const cell = row.insertCell();
 
-            // Если это первая строка группы с rowspan > 1, добавляем атрибут rowspan
+            // Если это первая строка группы и rowspan > 1, добавляем атрибут rowspan
             if (tableClass === 'debtors-table' && (h.key === '№ п/п' || h.key === 'Фамилия должника') && rowData.rowspan > 1) {
                 cell.rowSpan = rowData.rowspan;
             }
             
+            // Заполняем ячейку данными
             cell.textContent = (rowData[h.key] !== null && rowData[h.key] !== undefined && rowData[h.key] !== '') ? rowData[h.key] : '';
         });
     });
@@ -233,7 +231,7 @@ function updateClock() {
     }
 }
 
-// --- Функции для фильтра должников ---
+// --- Функции для фильтра должников (ИСПРАВЛЕНЫ) ---
 function toggleDebtorFilter() {
     const filterOptions = document.getElementById('debtorFilterOptions');
     filterOptions.classList.toggle('filter-options-show');
@@ -250,7 +248,7 @@ function renderDebtorFilter(debtors) {
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.value = debtor;
-        checkbox.checked = true;
+        checkbox.checked = true; // По умолчанию выбраны все
         checkbox.addEventListener('change', updateDebtorsTable);
         
         label.appendChild(checkbox);
@@ -264,29 +262,29 @@ function updateDebtorsTable() {
     const selectedDebtors = [];
     
     const selectAllCheckbox = document.querySelector('#debtorFilterOptions input[value="Все"]');
-    const isSelectAllChecked = selectAllCheckbox && selectAllCheckbox.checked;
-
-    if (isSelectAllChecked) {
-        checkboxes.forEach(cb => {
-            if (cb.value !== 'Все') {
-                cb.checked = false;
-            }
-        });
-        selectedDebtors.push(...availableDebtors);
-    } else {
-         checkboxes.forEach(cb => {
-            if (cb.checked) {
-                selectedDebtors.push(cb.value);
-            }
-        });
-        if (selectedDebtors.length === availableDebtors.length && selectAllCheckbox) {
-            selectAllCheckbox.checked = true;
-            selectedDebtors.length = 0;
-            selectedDebtors.push(...availableDebtors);
+    
+    // Определяем, кто выбран
+    checkboxes.forEach(cb => {
+        if (cb.checked && cb.value !== 'Все') {
+            selectedDebtors.push(cb.value);
         }
+    });
+
+    // Если все должники выбраны, отмечаем "Все"
+    if (selectedDebtors.length === availableDebtors.length && selectAllCheckbox) {
+        selectAllCheckbox.checked = true;
+    } else if (selectAllCheckbox) {
+        selectAllCheckbox.checked = false;
+    }
+
+    // Если "Все" выбрано, добавляем всех должников в массив для рендера
+    const isSelectAllChecked = selectAllCheckbox && selectAllCheckbox.checked;
+    if (isSelectAllChecked) {
+        selectedDebtors.push(...availableDebtors);
     }
     
-    if (selectedDebtors.length === 0) {
+    // Если ничего не выбрано, то ничего не отображаем
+    if (selectedDebtors.length === 0 && !isSelectAllChecked) {
         renderTable([], 'debtors-table-container', []);
     } else {
         renderTable(debtorsSummaryData, 'debtors-table-container', debtorsTableHeaders, null, 'debtors-table', 'all', selectedDebtors);
