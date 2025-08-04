@@ -182,28 +182,22 @@ function renderTable(data, containerId, headersMap, uniqueByKey = null, tableCla
             row.classList.add(rowData.cssClass);
         }
         
-        // --- ИСПРАВЛЕННАЯ ЛОГИКА ДЛЯ ТАБЛИЦЫ ДОЛЖНИКОВ ---
         if (tableClass === 'debtors-table') {
-            // Если это первая строка в объединенной группе (rowspan > 0)
             if (rowData.rowspan > 0) {
-                // Создаем первую ячейку "№ п/п" с rowspan
                 const cellNum = row.insertCell();
                 cellNum.textContent = rowData['№ п/п'];
                 cellNum.rowSpan = rowData.rowspan;
                 
-                // Создаем вторую ячейку "Фамилия должника" с rowspan
                 const cellDebtor = row.insertCell();
                 cellDebtor.textContent = rowData['Фамилия должника'];
                 cellDebtor.rowSpan = rowData.rowspan;
                 
-                // Создаем остальные две ячейки для "Материала" и "Количества"
                 const cellMaterial = row.insertCell();
                 cellMaterial.textContent = rowData['Материал'];
                 
                 const cellQuantity = row.insertCell();
                 cellQuantity.textContent = rowData['Количество'];
             } else {
-                // Для всех остальных строк в группе, создаем только ячейки для "Материала" и "Количества"
                 const cellMaterial = row.insertCell();
                 cellMaterial.textContent = rowData['Материал'];
                 
@@ -212,7 +206,6 @@ function renderTable(data, containerId, headersMap, uniqueByKey = null, tableCla
             }
             
         } else {
-            // Логика для других таблиц
             displayHeaders.forEach(h => {
                 const cell = row.insertCell();
                 cell.textContent = (rowData[h.key] !== null && rowData[h.key] !== undefined && rowData[h.key] !== '') ? rowData[h.key] : '';
@@ -304,15 +297,25 @@ function updateDebtorsTable(event) {
     let currentDebtorIsSelected = false;
 
     debtorsSummaryData.forEach(row => {
-        // Проверяем, является ли эта строка первой для нового должника (поле Фамилия заполнено)
         if (row['Фамилия должника']) {
-            // Обновляем флаг, если этот должник выбран
             currentDebtorIsSelected = selectedDebtors.includes(row['Фамилия должника']);
         }
         
-        // Если текущая группа должника выбрана, добавляем строку (включая строки с пустым полем Фамилия)
         if (currentDebtorIsSelected) {
             filteredDebtorsData.push(row);
+        }
+    });
+    
+    // --- НОВАЯ ЛОГИКА ДЛЯ ПРАВИЛЬНОЙ НУМЕРАЦИИ ПОСЛЕ ФИЛЬТРАЦИИ ---
+    let newCounter = 1;
+    filteredDebtorsData.forEach(row => {
+        // Обновляем номер только для первой строки каждого должника
+        if (row['Фамилия должника']) {
+            row['№ п/п'] = newCounter;
+            newCounter++;
+        } else {
+            // Для последующих строк того же должника номер должен быть пустым
+            row['№ п/п'] = '';
         }
     });
     
