@@ -186,29 +186,30 @@ function renderTable(data, containerId, headersMap, uniqueByKey = null, tableCla
             row.classList.add(rowData.cssClass);
         }
         
-        // Создаем ячейки для № п/п и Фамилии только если это не объединенная строка
-        if (tableClass === 'debtors-table' && rowData.rowspan > 0) {
-            const cell1 = row.insertCell(0);
-            cell1.textContent = rowData['№ п/п'];
-            cell1.rowSpan = rowData.rowspan;
+        // --- Исправленная логика для таблицы должников ---
+        if (tableClass === 'debtors-table') {
+            // Если это первая строка в объединенной группе (rowspan > 0)
+            if (rowData.rowspan > 0) {
+                // Создаем первую ячейку "№ п/п" с rowspan
+                const cellNum = row.insertCell();
+                cellNum.textContent = rowData['№ п/п'];
+                cellNum.rowSpan = rowData.rowspan;
+                
+                // Создаем вторую ячейку "Фамилия должника" с rowspan
+                const cellDebtor = row.insertCell();
+                cellDebtor.textContent = rowData['Фамилия должника'];
+                cellDebtor.rowSpan = rowData.rowspan;
+            }
             
-            const cell2 = row.insertCell(1);
-            cell2.textContent = rowData['Фамилия должника'];
-            cell2.rowSpan = rowData.rowspan;
+            // Затем создаем остальные ячейки, которые не объединены
+            const cellMaterial = row.insertCell();
+            cellMaterial.textContent = rowData['Материал'];
             
-            // Затем создаем остальные ячейки
-            const cell3 = row.insertCell(2);
-            cell3.textContent = rowData['Материал'];
-            const cell4 = row.insertCell(3);
-            cell4.textContent = rowData['Количество'];
-        } else if (tableClass === 'debtors-table' && rowData.rowspan === 0) {
-             // Для объединенных строк, создаем только ячейки для Материала и Количества
-             const cell1 = row.insertCell(0);
-             cell1.textContent = rowData['Материал'];
-             const cell2 = row.insertCell(1);
-             cell2.textContent = rowData['Количество'];
+            const cellQuantity = row.insertCell();
+            cellQuantity.textContent = rowData['Количество'];
+            
         } else {
-            // Для других таблиц (не должников), создаем все ячейки
+            // Логика для других таблиц
             displayHeaders.forEach(h => {
                 const cell = row.insertCell();
                 cell.textContent = (rowData[h.key] !== null && rowData[h.key] !== undefined && rowData[h.key] !== '') ? rowData[h.key] : '';
@@ -277,30 +278,17 @@ function updateDebtorsTable(event) {
         checkboxes.forEach(cb => {
             cb.checked = event.target.checked;
         });
-        if (event.target.checked) {
-            selectedDebtors.push(...availableDebtors);
-        }
-    } else {
-        let allChecked = true;
-        checkboxes.forEach(cb => {
-            if (cb.value !== 'Все' && cb.checked) {
-                selectedDebtors.push(cb.value);
-            }
-            if (cb.value !== 'Все' && !cb.checked) {
-                allChecked = false;
-            }
-        });
-
-        if (selectAllCheckbox) {
-            selectAllCheckbox.checked = allChecked;
-        }
     }
-    
-    // Если "Все" выбрано, добавляем всех должников в массив для рендера
-    const isSelectAllChecked = selectAllCheckbox && selectAllCheckbox.checked;
-    if (isSelectAllChecked) {
-        selectedDebtors.length = 0; // Очищаем, чтобы не было дублирования
-        selectedDebtors.push(...availableDebtors);
+
+    checkboxes.forEach(cb => {
+        if (cb.value !== 'Все' && cb.checked) {
+            selectedDebtors.push(cb.value);
+        }
+    });
+
+    if (selectAllCheckbox) {
+        const isAllDebtorsSelected = selectedDebtors.length === availableDebtors.length;
+        selectAllCheckbox.checked = isAllDebtorsSelected;
     }
     
     // Если ничего не выбрано, то ничего не отображаем
