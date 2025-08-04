@@ -10,7 +10,6 @@ h1, h2 {
     text-align: center;
 }
 
-/* --- СТИЛИ ДЛЯ ЖИВЫХ ЧАСОВ --- */
 #live-clock {
     font-size: 1.5em;
     font-weight: bold;
@@ -27,9 +26,8 @@ h1, h2 {
         margin-bottom: 10px;
     }
 }
-/* --- КОНЕЦ СТИЛЕЙ ДЛЯ ЖИВЫХ ЧАСОВ --- */
 
-/* --- Скрытие раздела "Движение материалов (Остатки)" --- */
+/* Скрытие раздела "Движение материалов (Остатки)" */
 #balances-table-container {
     display: none;
 }
@@ -37,7 +35,6 @@ h1, h2 {
 #balances-loading {
     display: none;
 }
-/* --- Конец скрытия раздела --- */
 
 .container {
     background-color: #fff;
@@ -45,7 +42,7 @@ h1, h2 {
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     margin-bottom: 20px;
-    overflow-x: auto;
+    overflow-x: auto; /* Добавляет горизонтальную прокрутку, если содержимое шире контейнера */
 }
 
 /* Общие стили для всех таблиц */
@@ -53,16 +50,16 @@ table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 3px;
-    table-layout: fixed; /* Установил фиксированный макет таблицы */
+    table-layout: fixed; /* Ключевое изменение: фиксированный макет таблицы */
 }
 
 table th, table td {
     border: 1px solid #383737;
     padding: 8px;
     text-align: left;
-    white-space: nowrap; /* Предотвращает перенос текста, позволяя ему обрезаться */
-    overflow: hidden; /* Обрезает содержимое, которое не помещается */
-    text-overflow: ellipsis; /* Добавляет многоточие к обрезанному тексту */
+    white-space: nowrap; /* Ключевое изменение: предотвращает перенос текста */
+    overflow: hidden; /* Обрезает содержимое */
+    text-overflow: ellipsis; /* Добавляет многоточие */
 }
 
 table th {
@@ -103,26 +100,11 @@ table tr:hover {
     border-radius: 4px;
 }
 
-/* --- СПЕЦИАЛЬНЫЕ СТИЛИ ДЛЯ ТАБЛИЦЫ "ДОЛГИ ПО СОТРУДНИКАМ" --- */
+/* Специальные стили для таблицы "Долги по сотрудникам" */
 .debtors-table {
-    table-layout: fixed; /* Применяется для мобильных и больших экранов */
+    table-layout: fixed; /* Фиксированный макет для стабильности */
     width: 100%;
     max-width: 100%;
-}
-
-.debtors-table th,
-.debtors-table td {
-    white-space: nowrap;
-}
-
-.debtors-table th:nth-child(2),
-.debtors-table td:nth-child(2) {
-    min-width: 120px;
-}
-
-.debtors-table th:nth-child(3),
-.debtors-table td:nth-child(3) {
-    min-width: 150px;
 }
 
 .debtors-table tr.debtor-group-odd td {
@@ -156,7 +138,7 @@ table tr:hover {
     padding-left: 3px;
 }
 
-/* --- Стили для нового фильтра --- */
+/* Стили для нового фильтра */
 .debtors-controls {
     display: flex;
     justify-content: center;
@@ -204,7 +186,7 @@ table tr:hover {
     display: block;
 }
 
-/* --- АДАПТИВНЫЕ СТИЛИ ДЛЯ МОБИЛЬНЫХ УСТРОЙСТВ (экраны до 768px) --- */
+/* Адаптивные стили для мобильных устройств (экраны до 768px) */
 @media (max-width: 768px) {
     body {
         margin: 0px;
@@ -226,6 +208,7 @@ table tr:hover {
         font-size: 0.7em;
     }
 
+    /* Удаление min-width для колонок debtors-table на мобильных */
     .debtors-table th:nth-child(2),
     .debtors-table td:nth-child(2),
     .debtors-table th:nth-child(3),
@@ -242,7 +225,7 @@ table tr:hover {
     }
 }
 
-/* --- Стили для АЛЬБОМНОЙ ОРИЕНТАЦИИ на МОБИЛЬНЫХ УСТРОЙСТВАХ --- */
+/* Стили для АЛЬБОМНОЙ ОРИЕНТАЦИИ на МОБИЛЬНЫХ УСТРОЙСТВАХ */
 @media (max-width: 768px) and (orientation: landscape) {
     .container {
         padding: 5px;
@@ -250,7 +233,7 @@ table tr:hover {
 
     .debtors-table {
         width: 100%;
-        table-layout: fixed;
+        table-layout: fixed; /* Фиксированный макет для стабильности */
     }
 
     .debtors-table th,
