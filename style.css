@@ -8,6 +8,8 @@ body {
 h1, h2 {
     color: #0056b3;
     text-align: center;
+    margin-top: 5px; /* ИЗМЕНЕНО: уменьшен отступ сверху */
+    margin-bottom: 5px; /* ИЗМЕНЕНО: уменьшен отступ снизу */
 }
 
 #live-clock {
