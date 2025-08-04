@@ -190,18 +190,16 @@ function renderTable(data, containerId, headersMap, uniqueByKey = null, tableCla
         if (tableClass === 'debtors-table') {
             // Если это первая строка в объединенной группе (rowspan > 0)
             if (rowData.rowspan > 0) {
-                // Создаем первую ячейку "№ п/п" с rowspan
                 const cellNum = row.insertCell();
                 cellNum.textContent = rowData['№ п/п'];
                 cellNum.rowSpan = rowData.rowspan;
                 
-                // Создаем вторую ячейку "Фамилия должника" с rowspan
                 const cellDebtor = row.insertCell();
                 cellDebtor.textContent = rowData['Фамилия должника'];
                 cellDebtor.rowSpan = rowData.rowspan;
             }
             
-            // Затем создаем остальные ячейки, которые не объединены
+            // Эти ячейки создаются всегда
             const cellMaterial = row.insertCell();
             cellMaterial.textContent = rowData['Материал'];
             
