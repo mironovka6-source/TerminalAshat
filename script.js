@@ -334,6 +334,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         function renderDebtorFilterOptions() {
             const uniqueDebtors = Array.from(new Set(debtorsSummaryData.filter(d => d['Фамилия должника']).map(d => d['Фамилия должника'])));
+            
+            // Добавляем чекбокс "Выбрать всех"
+            const selectAllLabel = document.createElement('label');
+            const selectAllCheckbox = document.createElement('input');
+            selectAllCheckbox.type = 'checkbox';
+            selectAllCheckbox.value = 'all';
+            selectAllCheckbox.checked = true;
+            selectAllLabel.appendChild(selectAllCheckbox);
+            selectAllLabel.append('Выбрать всех');
+            debtorFilterOptionsDiv.appendChild(selectAllLabel);
+
             uniqueDebtors.sort().forEach(debtor => {
                 const label = document.createElement('label');
                 const checkbox = document.createElement('input');
@@ -347,42 +358,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         function filterDebtorsTable() {
-            const tableContainer = document.getElementById('debtors-table-container');
-            if (!tableContainer) return;
-            const table = tableContainer.querySelector('table');
-            if (!table) return;
-            const rows = table.getElementsByTagName('tr');
+            const checkedCheckboxes = debtorFilterOptionsDiv.querySelectorAll('input[type="checkbox"]:checked');
+            const checkedDebtors = Array.from(checkedCheckboxes)
+                                       .map(checkbox => checkbox.value)
+                                       .filter(value => value !== 'all');
 
-            const checkedDebtors = Array.from(debtorFilterOptionsDiv.querySelectorAll('input[type="checkbox"]:checked'))
-                                       .map(checkbox => checkbox.value);
-            
-            // Если ни один не выбран, ничего не делаем (или можно скрыть все)
-            if (checkedDebtors.length === 0) {
-                 for (let i = 1; i < rows.length; i++) {
-                    rows[i].style.display = 'none';
-                }
-                return;
+            let filteredDebtorsData;
+
+            if (checkedDebtors.length === 0 || checkedDebtors.length === (debtorFilterOptionsDiv.querySelectorAll('input[type="checkbox"]').length - 1)) {
+                // Если не выбрано ничего или все, показываем все записи.
+                filteredDebtorsData = debtorsSummaryData;
+            } else {
+                // Иначе фильтруем данные по выбранным должникам
+                filteredDebtorsData = debtorsSummaryData.filter(row => checkedDebtors.includes(row['Фамилия должника']));
             }
 
-            let lastVisibleDebtorName = '';
-            for (let i = 1; i < rows.length; i++) {
-                const row = rows[i];
-                const debtorNameCell = row.cells[1];
-                let currentDebtorName = '';
-
-                if (debtorNameCell && debtorNameCell.textContent) {
-                    currentDebtorName = debtorNameCell.textContent;
-                    lastVisibleDebtorName = currentDebtorName;
-                } else {
-                    currentDebtorName = lastVisibleDebtorName;
-                }
-                
-                if (checkedDebtors.includes(currentDebtorName)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            }
+            // Перерисовываем таблицу с новым массивом данных
+            const debtorsTableHeaders = [
+                { key: '№ п/п', label: '№' },
+                { key: 'Фамилия должника', label: 'Фамилия должника' },
+                { key: 'Материал', label: 'Материал' },
+                { key: 'Количество', label: 'Кол-во' }
+            ];
+            renderTable(filteredDebtorsData, 'debtors-table-container', debtorsTableHeaders, null, 'debtors-table', 'all');
         }
 
         if (loadedTransactions) {
@@ -394,10 +392,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                 debtorFilterOptionsDiv.classList.toggle('filter-options-show');
             });
         }
-
+        
         if (debtorFilterOptionsDiv) {
             debtorFilterOptionsDiv.addEventListener('change', (event) => {
-                if (event.target.type === 'checkbox') {
+                const target = event.target;
+                if (target.type === 'checkbox') {
+                    if (target.value === 'all') {
+                        const allCheckboxes = debtorFilterOptionsDiv.querySelectorAll('input[type="checkbox"]');
+                        allCheckboxes.forEach(cb => cb.checked = target.checked);
+                    } else {
+                        const allCheckbox = debtorFilterOptionsDiv.querySelector('input[value="all"]');
+                        const otherCheckboxes = debtorFilterOptionsDiv.querySelectorAll('input[type="checkbox"]:not([value="all"])');
+                        const allOthersChecked = Array.from(otherCheckboxes).every(cb => cb.checked);
+                        allCheckbox.checked = allOthersChecked;
+                    }
                     filterDebtorsTable();
                 }
             });
