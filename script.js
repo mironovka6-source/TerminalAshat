@@ -123,7 +123,7 @@ async function loadGoogleSheetData(url) {
     }
 }
 
-// --- ИСПРАВЛЕННАЯ ФУНКЦИЯ ДЛЯ ОТОБРАЖЕНИЯ ДАННЫХ В ТАБЛИЦЕ ---
+// --- ФУНКЦИЯ ДЛЯ ОТОБРАЖЕНИЯ ДАННЫХ В ТАБЛИЦЕ ---
 function renderTable(data, containerId, headersMap, uniqueByKey = null, tableClass = null, limit = 'all', filterByDebtors = []) {
     const container = document.getElementById(containerId);
     if (!container) {
@@ -239,7 +239,7 @@ function updateClock() {
     }
 }
 
-// --- ИСПРАВЛЕННЫЕ ФУНКЦИИ ДЛЯ ФИЛЬТРА ДОЛЖНИКОВ ---
+// --- ФУНКЦИИ ДЛЯ ФИЛЬТРА ДОЛЖНИКОВ ---
 function toggleDebtorFilter() {
     const filterOptions = document.getElementById('debtorFilterOptions');
     filterOptions.classList.toggle('filter-options-show');
@@ -306,20 +306,54 @@ function updateDebtorsTable(event) {
         }
     });
     
-    // --- НОВАЯ ЛОГИКА ДЛЯ ПРАВИЛЬНОЙ НУМЕРАЦИИ ПОСЛЕ ФИЛЬТРАЦИИ ---
     let newCounter = 1;
     filteredDebtorsData.forEach(row => {
-        // Обновляем номер только для первой строки каждого должника
         if (row['Фамилия должника']) {
             row['№ п/п'] = newCounter;
             newCounter++;
         } else {
-            // Для последующих строк того же должника номер должен быть пустым
             row['№ п/п'] = '';
         }
     });
     
     renderTable(filteredDebtorsData, 'debtors-table-container', debtorsTableHeaders, null, 'debtors-table');
+}
+
+// --- НОВАЯ ФУНКЦИЯ: СДЕЛАТЬ СКРИНШОТ ТАБЛИЦЫ ---
+async function takeDebtorsTableScreenshot() {
+    const tableContainer = document.getElementById('debtors-table-container');
+
+    if (!tableContainer) {
+        alert('Контейнер с таблицей не найден!');
+        return;
+    }
+
+    // Включаем полосу прокрутки, если она нужна, чтобы html2canvas мог захватить всю таблицу.
+    const originalOverflow = tableContainer.style.overflow;
+    tableContainer.style.overflow = 'visible';
+
+    // Создаем скриншот с помощью библиотеки html2canvas
+    try {
+        const canvas = await html2canvas(tableContainer, {
+            logging: false, // Отключаем логи в консоль
+            useCORS: true, // Разрешаем использование внешних ресурсов, если они есть
+        });
+
+        // Создаем ссылку для скачивания изображения
+        const a = document.createElement('a');
+        a.href = canvas.toDataURL('image/png');
+        a.download = 'Долги_по_сотрудникам.png';
+        
+        // "Нажимаем" на ссылку, чтобы запустить скачивание
+        a.click();
+        
+    } catch (error) {
+        console.error('Ошибка при создании скриншота:', error);
+        alert('Не удалось сделать скриншот.');
+    } finally {
+        // Возвращаем исходное значение overflow, чтобы не менять поведение страницы
+        tableContainer.style.overflow = originalOverflow;
+    }
 }
 
 
@@ -432,5 +466,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const showDebtorFilterButton = document.getElementById('showDebtorFilterButton');
     if (showDebtorFilterButton) {
         showDebtorFilterButton.addEventListener('click', toggleDebtorFilter);
+    }
+    
+    // ДОБАВЛЕННЫЙ КОД: Обработчик для новой кнопки скриншота
+    const takeScreenshotButton = document.getElementById('takeScreenshotButton');
+    if (takeScreenshotButton) {
+        takeScreenshotButton.addEventListener('click', takeDebtorsTableScreenshot);
     }
 });
