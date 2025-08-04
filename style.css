@@ -55,9 +55,9 @@ table th, table td {
     border: 1px solid #383737;
     padding: 8px;
     text-align: left;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal; /* ИЗМЕНЕНО: Разрешает перенос текста */
+    overflow: visible; /* ИЗМЕНЕНО: Убираем скрытие текста */
+    text-overflow: clip; /* ИЗМЕНЕНО: Убираем многоточие */
     vertical-align: top;
 }
 
@@ -113,17 +113,17 @@ table tr:hover {
 
 .debtors-table th:nth-child(2),
 .debtors-table td:nth-child(2) {
-    width: 25%; /* Фамилия должника */
+    width: 30%; /* ИЗМЕНЕНО: Фамилия должника (увеличено) */
 }
 
 .debtors-table th:nth-child(3),
 .debtors-table td:nth-child(3) {
-    width: 40%; /* Материал */
+    width: 45%; /* ИЗМЕНЕНО: Материал (увеличено) */
 }
 
 .debtors-table th:nth-child(4),
 .debtors-table td:nth-child(4) {
-    width: 30%; /* Количество */
+    width: 20%; /* ИЗМЕНЕНО: Количество (уменьшено) */
 }
 
 .debtors-table td[rowspan] {
@@ -250,7 +250,7 @@ table tr:hover {
 
     .debtors-table th,
     .debtors-table td {
-        white-space: nowrap;
+        white-space: normal;
         font-size: 0.8em;
         padding: 5px;
     }
