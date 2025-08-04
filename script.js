@@ -327,17 +327,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         ];
 
         renderTable(debtorsSummaryData, 'debtors-table-container', debtorsTableHeaders, null, 'debtors-table', 'all');
-
-        // --- НОВЫЙ КОД ДЛЯ МНОЖЕСТВЕННОЙ ФИЛЬТРАЦИИ ---
-        const debtorFilterSelect = document.getElementById('debtorFilterSelect');
-        const uniqueDebtors = Array.from(new Set(debtorsSummaryData.filter(d => d['Фамилия должника']).map(d => d['Фамилия должника'])));
         
-        uniqueDebtors.sort().forEach(debtor => {
-            const option = document.createElement('option');
-            option.value = debtor;
-            option.textContent = debtor;
-            debtorFilterSelect.appendChild(option);
-        });
+        // --- НОВЫЙ КОД ДЛЯ ФИЛЬТРАЦИИ ЧЕКБОКСАМИ ---
+        const debtorFilterOptionsDiv = document.getElementById('debtorFilterOptions');
+        const showDebtorFilterButton = document.getElementById('showDebtorFilterButton');
+
+        function renderDebtorFilterOptions() {
+            const uniqueDebtors = Array.from(new Set(debtorsSummaryData.filter(d => d['Фамилия должника']).map(d => d['Фамилия должника'])));
+            uniqueDebtors.sort().forEach(debtor => {
+                const label = document.createElement('label');
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.value = debtor;
+                checkbox.checked = true; // По умолчанию все выбраны
+                label.appendChild(checkbox);
+                label.append(debtor);
+                debtorFilterOptionsDiv.appendChild(label);
+            });
+        }
 
         function filterDebtorsTable() {
             const tableContainer = document.getElementById('debtors-table-container');
@@ -346,14 +353,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!table) return;
             const rows = table.getElementsByTagName('tr');
 
-            const selectedOptions = Array.from(debtorFilterSelect.options)
-                                       .filter(option => option.selected)
-                                       .map(option => option.value);
-
-            // Если выбран "все" или ни один не выбран, показываем все
-            if (selectedOptions.includes('all') || selectedOptions.length === 0) {
-                for (let i = 1; i < rows.length; i++) {
-                    rows[i].style.display = '';
+            const checkedDebtors = Array.from(debtorFilterOptionsDiv.querySelectorAll('input[type="checkbox"]:checked'))
+                                       .map(checkbox => checkbox.value);
+            
+            // Если ни один не выбран, ничего не делаем (или можно скрыть все)
+            if (checkedDebtors.length === 0) {
+                 for (let i = 1; i < rows.length; i++) {
+                    rows[i].style.display = 'none';
                 }
                 return;
             }
@@ -364,53 +370,42 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const debtorNameCell = row.cells[1];
                 let currentDebtorName = '';
 
-                if (debtorNameCell) {
+                if (debtorNameCell && debtorNameCell.textContent) {
                     currentDebtorName = debtorNameCell.textContent;
                     lastVisibleDebtorName = currentDebtorName;
                 } else {
                     currentDebtorName = lastVisibleDebtorName;
                 }
                 
-                if (selectedOptions.includes(currentDebtorName)) {
+                if (checkedDebtors.includes(currentDebtorName)) {
                     row.style.display = '';
                 } else {
                     row.style.display = 'none';
                 }
             }
         }
-        if (debtorFilterSelect) {
-            debtorFilterSelect.addEventListener('change', filterDebtorsTable);
+
+        if (loadedTransactions) {
+            renderDebtorFilterOptions();
+        }
+
+        if (showDebtorFilterButton) {
+            showDebtorFilterButton.addEventListener('click', () => {
+                debtorFilterOptionsDiv.classList.toggle('filter-options-show');
+            });
+        }
+
+        if (debtorFilterOptionsDiv) {
+            debtorFilterOptionsDiv.addEventListener('change', (event) => {
+                if (event.target.type === 'checkbox') {
+                    filterDebtorsTable();
+                }
+            });
         }
     } else {
         const debtorsContainer = document.getElementById('debtors-table-container');
         if (debtorsContainer) debtorsContainer.innerHTML = '<p class="error-message">Не удалось загрузить данные о долгах. Проверьте URL или настройки публикации.</p>';
         const debtorsLoading = document.getElementById('debtors-loading');
         if (debtorsLoading) debtorsLoading.style.display = 'none';
-    }
-
-    const downloadButton = document.getElementById('downloadDebtorsImage');
-    if (downloadButton) {
-        downloadButton.addEventListener('click', () => {
-            const tableContainer = document.getElementById('debtors-table-container');
-            if (tableContainer) {
-                html2canvas(tableContainer, {
-                    useCORS: true,
-                    scale: 2
-                }).then(canvas => {
-                    const imageData = canvas.toDataURL('image/png');
-                    const link = document.createElement('a');
-                    link.href = imageData;
-                    link.download = 'Долги_сотрудников.png';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                }).catch(error => {
-                    console.error('Ошибка при создании скриншота:', error);
-                    alert('Не удалось создать скриншот. Пожалуйста, попробуйте снова.');
-                });
-            } else {
-                alert('Контейнер с таблицей не найден.');
-            }
-        });
     }
 });
