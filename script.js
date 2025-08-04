@@ -143,8 +143,6 @@ function renderTable(data, containerId, headersMap, uniqueByKey = null, tableCla
 
     let processedData = [...data];
 
-    // Убрали фильтрацию из этой функции, теперь она выполняется в updateDebtorsTable
-
     if (uniqueByKey && processedData.length > 0) {
         const seenKeys = new Set();
         processedData = processedData.filter(row => {
@@ -297,7 +295,6 @@ function updateDebtorsTable(event) {
         selectAllCheckbox.checked = isAllDebtorsSelected;
     }
     
-    // --- НОВАЯ, ИСПРАВЛЕННАЯ ЛОГИКА ФИЛЬТРАЦИИ ---
     if (selectedDebtors.length === 0) {
         renderTable([], 'debtors-table-container', []);
         return;
