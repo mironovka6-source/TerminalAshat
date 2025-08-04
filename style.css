@@ -113,12 +113,12 @@ table tr:hover {
 
 .debtors-table th:nth-child(2),
 .debtors-table td:nth-child(2) {
-    width: 20%; /* Фамилия должника (увеличено) */
+    width: 25%; /* Фамилия должника (увеличено) */
 }
 
 .debtors-table th:nth-child(3),
 .debtors-table td:nth-child(3) {
-    width: 65%; /* Материал (увеличено) */
+    width: 60%; /* Материал (увеличено) */
 }
 
 .debtors-table th:nth-child(4),
