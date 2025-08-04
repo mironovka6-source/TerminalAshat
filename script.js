@@ -8,7 +8,8 @@ const TRANSACTIONS_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_I
 
 // Объявляем переменные для хранения данных таблиц в глобальной области видимости
 let balancesData = [];
-let debtorsSummaryData = []; 
+let debtorsSummaryData = []; // Будет хранить детализированные данные по должникам
+let availableDebtors = []; // Список уникальных должников для фильтра
 
 // --- Функция: Парсинг JSON-ответа от Google Sheets ---
 function parseGoogleSheetJSON(jsonText) {
@@ -114,8 +115,8 @@ async function loadGoogleSheetData(url) {
     }
 }
 
-// --- Функция для отображения данных в таблице ---
-function renderTable(data, containerId, headersMap, uniqueByKey = null, tableClass = null, limit = 'all') {
+// --- Функция для отображения данных в таблице (ОБНОВЛЕНА ДЛЯ ROWSPAN) ---
+function renderTable(data, containerId, headersMap, uniqueByKey = null, tableClass = null, limit = 'all', filterByDebtors = []) {
     const container = document.getElementById(containerId);
     if (!container) {
         console.error(`Контейнер с ID "${containerId}" не найден.`);
@@ -133,6 +134,11 @@ function renderTable(data, containerId, headersMap, uniqueByKey = null, tableCla
     }
 
     let processedData = [...data];
+
+    // Применяем фильтр по должникам, если он есть
+    if (filterByDebtors.length > 0) {
+        processedData = processedData.filter(row => filterByDebtors.includes(row['Фамилия должника']));
+    }
 
     if (uniqueByKey && data.length > 0) {
         const seenKeys = new Set();
@@ -181,19 +187,20 @@ function renderTable(data, containerId, headersMap, uniqueByKey = null, tableCla
         }
 
         displayHeaders.forEach(h => {
-            if (tableClass === 'debtors-table' && (h.key === '№ п/п' || h.key === 'Фамилия должника')) {
-                if (rowData.rowspan === 0) {
-                    return;
-                }
-            }
-
-            const cell = row.insertCell();
-            cell.textContent = (rowData[h.key] !== null && rowData[h.key] !== undefined && rowData[h.key] !== '') ? rowData[h.key] : '';
-
+            const cell = row.insertCell(); // Создаем ячейку
+            
             if (tableClass === 'debtors-table' && (h.key === '№ п/п' || h.key === 'Фамилия должника')) {
                 if (rowData.rowspan && rowData.rowspan > 1) {
                     cell.rowSpan = rowData.rowspan;
+                    cell.textContent = rowData[h.key];
+                    cell.classList.add('merged-cell');
+                } else if (rowData.rowspan === 0) {
+                     cell.classList.add('hidden-cell');
+                } else {
+                    cell.textContent = rowData[h.key];
                 }
+            } else {
+                cell.textContent = (rowData[h.key] !== null && rowData[h.key] !== undefined && rowData[h.key] !== '') ? rowData[h.key] : '';
             }
         });
     });
@@ -202,31 +209,98 @@ function renderTable(data, containerId, headersMap, uniqueByKey = null, tableCla
     container.appendChild(table);
 }
 
-// --- Загрузка и отображение данных при загрузке страницы ---
-document.addEventListener('DOMContentLoaded', async () => {
-    // --- ФУНКЦИЯ ДЛЯ ЖИВЫХ ЧАСОВ ---
-    function updateClock() {
-        const now = new Date();
-        const daysOfWeek = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
-        const dayName = daysOfWeek[now.getDay()];
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        const seconds = String(now.getSeconds()).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const year = now.getFullYear();
 
-        const timeString = `${hours}:${minutes}:${seconds}`;
-        const dateString = `${day}.${month}.${year}`;
+// --- ФУНКЦИЯ ДЛЯ ЖИВЫХ ЧАСОВ ---
+function updateClock() {
+    const now = new Date();
+    const daysOfWeek = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
+    const dayName = daysOfWeek[now.getDay()];
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const year = now.getFullYear();
 
-        const clockElement = document.getElementById('live-clock');
-        if (clockElement) {
-            clockElement.textContent = `${dayName}, ${dateString} ${timeString}`;
+    const timeString = `${hours}:${minutes}:${seconds}`;
+    const dateString = `${day}.${month}.${year}`;
+    const clockElement = document.getElementById('live-clock');
+
+    if (clockElement) {
+        clockElement.textContent = `${dayName}, ${dateString} ${timeString}`;
+    }
+}
+
+// --- Функции для фильтра должников ---
+function toggleDebtorFilter() {
+    const filterOptions = document.getElementById('debtorFilterOptions');
+    filterOptions.classList.toggle('filter-options-show');
+}
+
+function renderDebtorFilter(debtors) {
+    const filterOptions = document.getElementById('debtorFilterOptions');
+    filterOptions.innerHTML = ''; // Очищаем старые опции
+
+    const allDebtors = ['Все'].concat(debtors);
+
+    allDebtors.forEach(debtor => {
+        const label = document.createElement('label');
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.value = debtor;
+        checkbox.checked = true; // По умолчанию выбраны все
+        checkbox.addEventListener('change', updateDebtorsTable);
+        
+        label.appendChild(checkbox);
+        label.appendChild(document.createTextNode(debtor));
+        filterOptions.appendChild(label);
+    });
+}
+
+function updateDebtorsTable() {
+    const checkboxes = document.querySelectorAll('#debtorFilterOptions input[type="checkbox"]');
+    const selectedDebtors = [];
+    
+    // Если выбран "Все", то выбираем всех должников из списка `availableDebtors`
+    const selectAllCheckbox = document.querySelector('#debtorFilterOptions input[value="Все"]');
+    const isSelectAllChecked = selectAllCheckbox && selectAllCheckbox.checked;
+
+    if (isSelectAllChecked) {
+        // Убираем флажки у остальных, если выбран "Все"
+        checkboxes.forEach(cb => {
+            if (cb.value !== 'Все') {
+                cb.checked = false;
+            }
+        });
+        // Если выбран "Все", то все должники считаются выбранными
+        selectedDebtors.push(...availableDebtors);
+    } else {
+         checkboxes.forEach(cb => {
+            if (cb.checked) {
+                selectedDebtors.push(cb.value);
+            }
+        });
+        // Если все остальные выбраны, но "Все" не выбран, то выбираем "Все"
+        if (selectedDebtors.length === availableDebtors.length && selectAllCheckbox) {
+            selectAllCheckbox.checked = true;
+            selectedDebtors.length = 0; // Очищаем массив, так как "Все" уже выбран
+            selectedDebtors.push(...availableDebtors);
         }
     }
+    
+    // Если ничего не выбрано, то ничего не отображаем
+    if (selectedDebtors.length === 0) {
+        renderTable([], 'debtors-table-container', []);
+    } else {
+        renderTable(debtorsSummaryData, 'debtors-table-container', debtorsTableHeaders, null, 'debtors-table', 'all', selectedDebtors);
+    }
+}
+
+
+// --- Загрузка и отображение данных при загрузке страницы ---
+document.addEventListener('DOMContentLoaded', async () => {
     updateClock();
     setInterval(updateClock, 1000);
-    // --- КОНЕЦ ФУНКЦИИ ДЛЯ ЖИВЫХ ЧАСОВ ---
     
     // - Загружаем Движение материалов (Остатки) -
     const balancesHeaders = [
@@ -291,18 +365,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         let groupIndex = 0;
 
         const sortedEmployees = Array.from(summaryMap.keys()).sort();
+        availableDebtors = sortedEmployees; // Сохраняем список должников для фильтра
 
         sortedEmployees.forEach(employee => {
             uniqueEmployeeCounter++;
             groupIndex++;
             const debts = summaryMap.get(employee);
             const sortedMaterials = Object.keys(debts).sort();
-
             const numMaterialsForEmployee = sortedMaterials.length;
 
             let isFirstMaterialForEmployee = true;
 
-            sortedMaterials.forEach((material, materialIndex) => {
+            sortedMaterials.forEach((material) => {
                 const rowData = {
                     '№ п/п': isFirstMaterialForEmployee ? uniqueEmployeeCounter : '',
                     'Фамилия должника': isFirstMaterialForEmployee ? employee : '',
@@ -318,7 +392,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
         debtorsSummaryData = currentDebtorsData;
-
         const debtorsTableHeaders = [
             { key: '№ п/п', label: '№' },
             { key: 'Фамилия должника', label: 'Фамилия должника' },
@@ -326,94 +399,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             { key: 'Количество', label: 'Кол-во' }
         ];
 
+        renderDebtorFilter(availableDebtors);
         renderTable(debtorsSummaryData, 'debtors-table-container', debtorsTableHeaders, null, 'debtors-table', 'all');
-        
-        // --- НОВЫЙ КОД ДЛЯ ФИЛЬТРАЦИИ ЧЕКБОКСАМИ ---
-        const debtorFilterOptionsDiv = document.getElementById('debtorFilterOptions');
-        const showDebtorFilterButton = document.getElementById('showDebtorFilterButton');
 
-        function renderDebtorFilterOptions() {
-            const uniqueDebtors = Array.from(new Set(debtorsSummaryData.filter(d => d['Фамилия должника']).map(d => d['Фамилия должника'])));
-            
-            // Добавляем чекбокс "Выбрать всех"
-            const selectAllLabel = document.createElement('label');
-            const selectAllCheckbox = document.createElement('input');
-            selectAllCheckbox.type = 'checkbox';
-            selectAllCheckbox.value = 'all';
-            selectAllCheckbox.checked = true;
-            selectAllLabel.appendChild(selectAllCheckbox);
-            selectAllLabel.append('Выбрать всех');
-            debtorFilterOptionsDiv.appendChild(selectAllLabel);
-
-            uniqueDebtors.sort().forEach(debtor => {
-                const label = document.createElement('label');
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.value = debtor;
-                checkbox.checked = true; // По умолчанию все выбраны
-                label.appendChild(checkbox);
-                label.append(debtor);
-                debtorFilterOptionsDiv.appendChild(label);
-            });
-        }
-
-        function filterDebtorsTable() {
-            const checkedCheckboxes = debtorFilterOptionsDiv.querySelectorAll('input[type="checkbox"]:checked');
-            const checkedDebtors = Array.from(checkedCheckboxes)
-                                       .map(checkbox => checkbox.value)
-                                       .filter(value => value !== 'all');
-
-            let filteredDebtorsData;
-
-            if (checkedDebtors.length === 0 || checkedDebtors.length === (debtorFilterOptionsDiv.querySelectorAll('input[type="checkbox"]').length - 1)) {
-                // Если не выбрано ничего или все, показываем все записи.
-                filteredDebtorsData = debtorsSummaryData;
-            } else {
-                // Иначе фильтруем данные по выбранным должникам
-                filteredDebtorsData = debtorsSummaryData.filter(row => checkedDebtors.includes(row['Фамилия должника']));
-            }
-
-            // Перерисовываем таблицу с новым массивом данных
-            const debtorsTableHeaders = [
-                { key: '№ п/п', label: '№' },
-                { key: 'Фамилия должника', label: 'Фамилия должника' },
-                { key: 'Материал', label: 'Материал' },
-                { key: 'Количество', label: 'Кол-во' }
-            ];
-            renderTable(filteredDebtorsData, 'debtors-table-container', debtorsTableHeaders, null, 'debtors-table', 'all');
-        }
-
-        if (loadedTransactions) {
-            renderDebtorFilterOptions();
-        }
-
-        if (showDebtorFilterButton) {
-            showDebtorFilterButton.addEventListener('click', () => {
-                debtorFilterOptionsDiv.classList.toggle('filter-options-show');
-            });
-        }
-        
-        if (debtorFilterOptionsDiv) {
-            debtorFilterOptionsDiv.addEventListener('change', (event) => {
-                const target = event.target;
-                if (target.type === 'checkbox') {
-                    if (target.value === 'all') {
-                        const allCheckboxes = debtorFilterOptionsDiv.querySelectorAll('input[type="checkbox"]');
-                        allCheckboxes.forEach(cb => cb.checked = target.checked);
-                    } else {
-                        const allCheckbox = debtorFilterOptionsDiv.querySelector('input[value="all"]');
-                        const otherCheckboxes = debtorFilterOptionsDiv.querySelectorAll('input[type="checkbox"]:not([value="all"])');
-                        const allOthersChecked = Array.from(otherCheckboxes).every(cb => cb.checked);
-                        allCheckbox.checked = allOthersChecked;
-                    }
-                    filterDebtorsTable();
-                }
-            });
-        }
     } else {
         const debtorsContainer = document.getElementById('debtors-table-container');
         if (debtorsContainer) debtorsContainer.innerHTML = '<p class="error-message">Не удалось загрузить данные о долгах. Проверьте URL или настройки публикации.</p>';
         const debtorsLoading = document.getElementById('debtors-loading');
         if (debtorsLoading) debtorsLoading.style.display = 'none';
+    }
+
+    // Обработчик для кнопки фильтра
+    const showDebtorFilterButton = document.getElementById('showDebtorFilterButton');
+    if (showDebtorFilterButton) {
+        showDebtorFilterButton.addEventListener('click', toggleDebtorFilter);
     }
 });
