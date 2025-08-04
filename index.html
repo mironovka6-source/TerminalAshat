@@ -26,9 +26,12 @@
 
     <h2>Долги по сотрудникам</h2>
     <div class="debtors-controls">
-        <input type="text" id="debtorSearchInput" placeholder="Фильтр по фамилии...">
+        <select id="debtorFilterSelect" multiple size="5">
+            <option value="all">-- Выбрать всех --</option>
+        </select>
         <button id="downloadDebtorsImage">Сделать скриншот</button>
     </div>
+    
     <p id="debtors-loading" class="loading">Загрузка данных о долгах...</p>
     <div id="debtors-table-container" class="container">
         </div>
