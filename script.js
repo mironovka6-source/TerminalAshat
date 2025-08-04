@@ -8,7 +8,7 @@ const TRANSACTIONS_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_I
 
 // Объявляем переменные для хранения данных таблиц в глобальной области видимости
 let balancesData = [];
-let debtorsSummaryData = []; // Будет хранить детализированные данные по должникам
+let debtorsSummaryData = []; 
 
 // --- Функция: Парсинг JSON-ответа от Google Sheets ---
 function parseGoogleSheetJSON(jsonText) {
@@ -114,7 +114,7 @@ async function loadGoogleSheetData(url) {
     }
 }
 
-// --- Функция для отображения данных в таблице (ОБНОВЛЕНА ДЛЯ ROWSPAN) ---
+// --- Функция для отображения данных в таблице ---
 function renderTable(data, containerId, headersMap, uniqueByKey = null, tableClass = null, limit = 'all') {
     const container = document.getElementById(containerId);
     if (!container) {
@@ -173,39 +173,30 @@ function renderTable(data, containerId, headersMap, uniqueByKey = null, tableCla
         headerRow.appendChild(th);
     });
 
-    // --- КЛЮЧЕВОЕ ИЗМЕНЕНИЕ В renderTable: ОБРАБОТКА ROWSPAN ---
     processedData.forEach(rowData => {
         const row = tbody.insertRow();
         
-        // Добавляем CSS-класс для группы строк (для чередования фона)
         if (rowData.cssClass) {
             row.classList.add(rowData.cssClass);
         }
 
         displayHeaders.forEach(h => {
-            // Если это таблица должников (по классу) и это колонки '№ п/п' или 'Фамилия должника'
-            // И ЭТО НЕ ПЕРВАЯ СТРОКА ГРУППЫ (то есть, rowspan === 0),
-            // то мы ПРОПУСКАЕМ создание новой ячейки, так как она будет объединена с предыдущей.
             if (tableClass === 'debtors-table' && (h.key === '№ п/п' || h.key === 'Фамилия должника')) {
                 if (rowData.rowspan === 0) {
-                    return; // Пропустить создание ячейки для этой строки
+                    return;
                 }
             }
 
-            const cell = row.insertCell(); // Создаем ячейку
+            const cell = row.insertCell();
             cell.textContent = (rowData[h.key] !== null && rowData[h.key] !== undefined && rowData[h.key] !== '') ? rowData[h.key] : '';
 
-            // Если это первая строка группы и колонки '№ п/п' или 'Фамилия должника',
-            // добавляем атрибут rowspan
             if (tableClass === 'debtors-table' && (h.key === '№ п/п' || h.key === 'Фамилия должника')) {
-                if (rowData.rowspan && rowData.rowspan > 1) { // Убеждаемся, что rowspan > 1
+                if (rowData.rowspan && rowData.rowspan > 1) {
                     cell.rowSpan = rowData.rowspan;
-                    //cell.style.verticalAlign = 'top'; // Выравниваем текст по верхнему краю в объединенной ячейке
                 }
             }
         });
     });
-    // --- КОНЕЦ КЛЮЧЕВОГО ИЗМЕНЕНИЯ В renderTable ---
 
     container.innerHTML = '';
     container.appendChild(table);
@@ -213,43 +204,29 @@ function renderTable(data, containerId, headersMap, uniqueByKey = null, tableCla
 
 // --- Загрузка и отображение данных при загрузке страницы ---
 document.addEventListener('DOMContentLoaded', async () => {
-    // ... (ваш существующий JavaScript-код выше) ...
+    // --- ФУНКЦИЯ ДЛЯ ЖИВЫХ ЧАСОВ ---
+    function updateClock() {
+        const now = new Date();
+        const daysOfWeek = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
+        const dayName = daysOfWeek[now.getDay()];
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const year = now.getFullYear();
 
-// --- ФУНКЦИЯ ДЛЯ ЖИВЫХ ЧАСОВ ---
-function updateClock() {
-    const now = new Date();
+        const timeString = `${hours}:${minutes}:${seconds}`;
+        const dateString = `${day}.${month}.${year}`;
 
-    // Массив с названиями дней недели на русском языке
-    const daysOfWeek = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
-    const dayName = daysOfWeek[now.getDay()]; // Получаем название дня недели
-
-    // Форматируем время в HH:MM:SS
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
-
-    // Форматируем дату в DD.MM.YYYY
-    const day = String(now.getDate()).padStart(2, '0');
-    const month = String(now.getMonth() + 1).padStart(2, '0'); // Месяцы от 0 до 11
-    const year = now.getFullYear();
-
-    const timeString = `${hours}:${minutes}:${seconds}`;
-    const dateString = `${day}.${month}.${year}`;
-
-    const clockElement = document.getElementById('live-clock');
-    if (clockElement) {
-        // Объединяем день недели, дату и время
-        clockElement.textContent = `${dayName}, ${dateString} ${timeString}`;
+        const clockElement = document.getElementById('live-clock');
+        if (clockElement) {
+            clockElement.textContent = `${dayName}, ${dateString} ${timeString}`;
+        }
     }
-}
-
-// Обновляем часы сразу при загрузке
-updateClock();
-// Обновляем часы каждую секунду
-setInterval(updateClock, 1000);
-// --- КОНЕЦ ФУНКЦИИ ДЛЯ ЖИВЫХ ЧАСОВ ---
-    
-    
+    updateClock();
+    setInterval(updateClock, 1000);
+    // --- КОНЕЦ ФУНКЦИИ ДЛЯ ЖИВЫХ ЧАСОВ ---
     
     // - Загружаем Движение материалов (Остатки) -
     const balancesHeaders = [
@@ -288,14 +265,13 @@ setInterval(updateClock, 1000);
         if (loading) loading.style.display = 'none';
     }
 
-    // --- Загружаем и агрегируем данные для должников (ОБНОВЛЕНО ДЛЯ ROWSPAN) ---
+    // --- Загружаем и агрегируем данные для должников ---
     const loadedTransactions = await loadGoogleSheetData(TRANSACTIONS_URL);
 
     if (loadedTransactions) {
         const debtorsTransactions = loadedTransactions.filter(row => row['Тип'] === 'Должен');
         const summaryMap = new Map();
 
-        // Сначала агрегируем долги, чтобы получить общие суммы по каждому сотруднику и материалу
         debtorsTransactions.forEach(transaction => {
             const employee = transaction['Сотрудник'];
             const material = transaction['Материал'];
@@ -311,18 +287,18 @@ setInterval(updateClock, 1000);
         });
 
         let currentDebtorsData = [];
-        let uniqueEmployeeCounter = 0; // Счетчик для уникальных фамилий
-        let groupIndex = 0; // Для чередования цветов групп
+        let uniqueEmployeeCounter = 0;
+        let groupIndex = 0;
 
         const sortedEmployees = Array.from(summaryMap.keys()).sort();
 
         sortedEmployees.forEach(employee => {
             uniqueEmployeeCounter++;
-            groupIndex++; // Увеличиваем индекс для каждой новой группы
+            groupIndex++;
             const debts = summaryMap.get(employee);
             const sortedMaterials = Object.keys(debts).sort();
 
-            const numMaterialsForEmployee = sortedMaterials.length; // <-- КОЛИЧЕСТВО СТРОК ДЛЯ ТЕКУЩЕГО ДОЛЖНИКА
+            const numMaterialsForEmployee = sortedMaterials.length;
 
             let isFirstMaterialForEmployee = true;
 
@@ -332,10 +308,8 @@ setInterval(updateClock, 1000);
                     'Фамилия должника': isFirstMaterialForEmployee ? employee : '',
                     'Материал': material,
                     'Количество': debts[material],
-                    // --- НОВЫЕ ПОЛЯ ДЛЯ ROWSPAN И КЛАССА ГРУППЫ ---
-                    'rowspan': isFirstMaterialForEmployee ? numMaterialsForEmployee : 0, // 0 означает, что ячейка не создается
-                    'cssClass': (groupIndex % 2 === 0) ? 'debtor-group-even' : 'debtor-group-odd' // Класс для группы
-                    // ---------------------------------------------
+                    'rowspan': isFirstMaterialForEmployee ? numMaterialsForEmployee : 0,
+                    'cssClass': (groupIndex % 2 === 0) ? 'debtor-group-even' : 'debtor-group-odd'
                 };
 
                 currentDebtorsData.push(rowData);
@@ -343,9 +317,8 @@ setInterval(updateClock, 1000);
             });
         });
 
-        debtorsSummaryData = currentDebtorsData; // Обновляем глобальную переменную
+        debtorsSummaryData = currentDebtorsData;
 
-        // Определяем заголовки для новой структуры таблицы должников
         const debtorsTableHeaders = [
             { key: '№ п/п', label: '№' },
             { key: 'Фамилия должника', label: 'Фамилия должника' },
@@ -353,13 +326,91 @@ setInterval(updateClock, 1000);
             { key: 'Количество', label: 'Кол-во' }
         ];
 
-        // Рендерим "Долги по сотрудникам" с новой структурой
         renderTable(debtorsSummaryData, 'debtors-table-container', debtorsTableHeaders, null, 'debtors-table', 'all');
 
+        // --- НОВЫЙ КОД ДЛЯ МНОЖЕСТВЕННОЙ ФИЛЬТРАЦИИ ---
+        const debtorFilterSelect = document.getElementById('debtorFilterSelect');
+        const uniqueDebtors = Array.from(new Set(debtorsSummaryData.filter(d => d['Фамилия должника']).map(d => d['Фамилия должника'])));
+        
+        uniqueDebtors.sort().forEach(debtor => {
+            const option = document.createElement('option');
+            option.value = debtor;
+            option.textContent = debtor;
+            debtorFilterSelect.appendChild(option);
+        });
+
+        function filterDebtorsTable() {
+            const tableContainer = document.getElementById('debtors-table-container');
+            if (!tableContainer) return;
+            const table = tableContainer.querySelector('table');
+            if (!table) return;
+            const rows = table.getElementsByTagName('tr');
+
+            const selectedOptions = Array.from(debtorFilterSelect.options)
+                                       .filter(option => option.selected)
+                                       .map(option => option.value);
+
+            // Если выбран "все" или ни один не выбран, показываем все
+            if (selectedOptions.includes('all') || selectedOptions.length === 0) {
+                for (let i = 1; i < rows.length; i++) {
+                    rows[i].style.display = '';
+                }
+                return;
+            }
+
+            let lastVisibleDebtorName = '';
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                const debtorNameCell = row.cells[1];
+                let currentDebtorName = '';
+
+                if (debtorNameCell) {
+                    currentDebtorName = debtorNameCell.textContent;
+                    lastVisibleDebtorName = currentDebtorName;
+                } else {
+                    currentDebtorName = lastVisibleDebtorName;
+                }
+                
+                if (selectedOptions.includes(currentDebtorName)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            }
+        }
+        if (debtorFilterSelect) {
+            debtorFilterSelect.addEventListener('change', filterDebtorsTable);
+        }
     } else {
         const debtorsContainer = document.getElementById('debtors-table-container');
         if (debtorsContainer) debtorsContainer.innerHTML = '<p class="error-message">Не удалось загрузить данные о долгах. Проверьте URL или настройки публикации.</p>';
         const debtorsLoading = document.getElementById('debtors-loading');
         if (debtorsLoading) debtorsLoading.style.display = 'none';
+    }
+
+    const downloadButton = document.getElementById('downloadDebtorsImage');
+    if (downloadButton) {
+        downloadButton.addEventListener('click', () => {
+            const tableContainer = document.getElementById('debtors-table-container');
+            if (tableContainer) {
+                html2canvas(tableContainer, {
+                    useCORS: true,
+                    scale: 2
+                }).then(canvas => {
+                    const imageData = canvas.toDataURL('image/png');
+                    const link = document.createElement('a');
+                    link.href = imageData;
+                    link.download = 'Долги_сотрудников.png';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }).catch(error => {
+                    console.error('Ошибка при создании скриншота:', error);
+                    alert('Не удалось создать скриншот. Пожалуйста, попробуйте снова.');
+                });
+            } else {
+                alert('Контейнер с таблицей не найден.');
+            }
+        });
     }
 });
