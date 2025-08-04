@@ -27,7 +27,6 @@ h1, h2 {
     }
 }
 
-/* Скрытие раздела "Движение материалов (Остатки)" */
 #balances-table-container {
     display: none;
 }
@@ -60,7 +59,7 @@ table th, table td {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    vertical-align: top; /* Выравнивает содержимое ячеек по верхнему краю */
+    vertical-align: top;
 }
 
 table th {
@@ -103,9 +102,21 @@ table tr:hover {
 
 /* Специальные стили для таблицы "Долги по сотрудникам" */
 .debtors-table {
-    table-layout: fixed; /* Ключевое изменение */
+    table-layout: fixed;
     width: 100%;
     max-width: 100%;
+}
+
+/* Скрываем ячейки с классом hidden-cell, чтобы они не ломали верстку */
+.hidden-cell {
+    display: none;
+}
+
+/* Стили для ячеек, объединенных по вертикали */
+.merged-cell {
+    vertical-align: middle !important;
+    text-align: left !important;
+    padding-left: 3px !important;
 }
 
 .debtors-table tr.debtor-group-odd td {
@@ -233,7 +244,7 @@ table tr:hover {
 
     .debtors-table {
         width: 100%;
-        table-layout: fixed; /* Ключевое изменение: теперь также фиксированный */
+        table-layout: fixed;
     }
 
     .debtors-table th,
