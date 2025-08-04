@@ -18,7 +18,6 @@
     <div id="live-clock"></div> <hr>
     <hr>
 
-    <!--<h2>Движение материалов (Остатки)</h2>-->
     <p id="balances-loading" class="loading">Загрузка данных об остатках...</p>
     <div id="balances-table-container" class="container"hidden>
         </div>
@@ -26,10 +25,15 @@
     <hr>
 
     <h2>Долги по сотрудникам</h2>
+    <div class="debtors-controls">
+        <input type="text" id="debtorSearchInput" placeholder="Фильтр по фамилии...">
+        <button id="downloadDebtorsImage">Сделать скриншот</button>
+    </div>
     <p id="debtors-loading" class="loading">Загрузка данных о долгах...</p>
     <div id="debtors-table-container" class="container">
         </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="script.js"></script>    
 </body>
 </html>
