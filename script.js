@@ -187,10 +187,13 @@ function renderTable(data, containerId, headersMap, uniqueByKey = null, tableCla
         }
 
         displayHeaders.forEach(h => {
-            // Если это таблица должников и это одна из колонок с rowspan,
-            // и при этом rowspan === 0, мы пропускаем создание ячейки.
-            if (tableClass === 'debtors-table' && (h.key === '№ п/п' || h.key === 'Фамилия должника') && rowData.rowspan === 0) {
-                return;
+            // Если это таблица должников и это колонки "№ п/п" или "Фамилия должника",
+            // и при этом rowspan === 0, мы пропускаем создание ячейки, так как
+            // она уже объединена ячейкой сверху.
+            if (tableClass === 'debtors-table' && (h.key === '№ п/п' || h.key === 'Фамилия должника')) {
+                if (rowData.rowspan === 0) {
+                    return; // Пропускаем эту итерацию
+                }
             }
             
             const cell = row.insertCell();
@@ -257,34 +260,40 @@ function renderDebtorFilter(debtors) {
     });
 }
 
-function updateDebtorsTable() {
+function updateDebtorsTable(event) {
     const checkboxes = document.querySelectorAll('#debtorFilterOptions input[type="checkbox"]');
     const selectedDebtors = [];
-    
     const selectAllCheckbox = document.querySelector('#debtorFilterOptions input[value="Все"]');
-    
-    // Определяем, кто выбран
-    checkboxes.forEach(cb => {
-        if (cb.checked && cb.value !== 'Все') {
-            selectedDebtors.push(cb.value);
+
+    if (event && event.target.value === 'Все') {
+        checkboxes.forEach(cb => {
+            cb.checked = event.target.checked;
+        });
+        if (event.target.checked) {
+            selectedDebtors.push(...availableDebtors);
         }
-    });
+    } else {
+        let allChecked = true;
+        checkboxes.forEach(cb => {
+            if (cb.value !== 'Все' && cb.checked) {
+                selectedDebtors.push(cb.value);
+            }
+            if (cb.value !== 'Все' && !cb.checked) {
+                allChecked = false;
+            }
+        });
 
-    // Если все должники выбраны, отмечаем "Все"
-    if (selectedDebtors.length === availableDebtors.length && selectAllCheckbox) {
-        selectAllCheckbox.checked = true;
-    } else if (selectAllCheckbox) {
-        selectAllCheckbox.checked = false;
-    }
-
-    // Если "Все" выбрано, добавляем всех должников в массив для рендера
-    const isSelectAllChecked = selectAllCheckbox && selectAllCheckbox.checked;
-    if (isSelectAllChecked) {
-        selectedDebtors.push(...availableDebtors);
+        if (selectAllCheckbox) {
+            selectAllCheckbox.checked = allChecked;
+            if (allChecked) {
+                selectedDebtors.length = 0;
+                selectedDebtors.push(...availableDebtors);
+            }
+        }
     }
     
     // Если ничего не выбрано, то ничего не отображаем
-    if (selectedDebtors.length === 0 && !isSelectAllChecked) {
+    if (selectedDebtors.length === 0) {
         renderTable([], 'debtors-table-container', []);
     } else {
         renderTable(debtorsSummaryData, 'debtors-table-container', debtorsTableHeaders, null, 'debtors-table', 'all', selectedDebtors);
@@ -305,7 +314,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         { key: 'Приход', label: 'Приход' },
         { key: 'Расход', label: 'Расход' },
         { key: 'Списание', label: 'Списание' },
-        { key: 'Возврат', label: 'Возврат' },
+        { key: 'Возврат', 'label': 'Возврат' },
         { key: 'Сейчас на складе', label: 'Сейчас на складе' }
     ];
     const loadedBalances = await loadGoogleSheetData(BALANCES_URL);
