@@ -4,7 +4,7 @@ const SPREADSHEET_ID = '11hO4BoQd5ArepejHEVB_zgRFqb862PBI';
 
 // URL-ы для получения данных из Google Таблиц в формате JSON
 const BALANCES_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&gid=1133040566`;
-const TRANSACTIONS_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&gid=224436106`;
+const TRANSACTIONS_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&gid=2023867136`;
 
 // Объявляем переменные для хранения данных таблиц в глобальной области видимости
 let balancesData = [];
