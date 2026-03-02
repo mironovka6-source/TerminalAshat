@@ -1,6 +1,6 @@
 // script.js
 // Вставьте сюда ID вашей Google Таблицы
-const SPREADSHEET_ID = '138AarGc1IgO2AQwxQ4b2I62zqd-6re63VWZAh55TTn4';
+const SPREADSHEET_ID = '11hO4BoQd5ArepejHEVB_zgRFqb862PBI';
 
 // URL-ы для получения данных из Google Таблиц в формате JSON
 const BALANCES_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&gid=1133040566`;
